@@ -1,0 +1,14 @@
+obj
+bin
+appsettings.Development.json
+.vs
+*.gen
+.idea
+appsettings.json
+HomeAssistantGenerated.cs
+*.bash
+NetDaemonCodegen
+*flirty*
+*Lock*
+FlirtyNotifications
+/Helpers/Notification Messages/

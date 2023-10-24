@@ -1,0 +1,145 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ChandlerHome.Helpers.WLEDControls
+{
+    public static class WledEffectLibrary
+    {
+        static Dictionary<string, int> effectLibrary = new Dictionary<string, int>();
+        static WledEffectLibrary()
+        {
+            effectLibrary = new Dictionary<string, int>
+            {
+                {"Solid", 0},
+                {"Blink", 1},
+                {"Breathe", 2},
+                {"Wipe", 3},
+                {"Wipe Random", 4},
+                {"Random Colors", 5},
+                {"Sweep", 6},
+                {"Dynamic", 7},
+                {"Colorloop", 8},
+                {"Rainbow", 9},
+                {"Scan", 10},
+                {"Scan Dual", 11},
+                {"Fade", 12},
+                {"Theater", 13},
+                {"Theater Rainbow", 14},
+                {"Running", 15},
+                {"Saw", 16},
+                {"Twinkle", 17},
+                {"Dissolve", 18},
+                {"Dissolve Rnd", 19},
+                {"Sparkle", 20},
+                {"Sparkle Dark", 21},
+                {"Sparkle+", 22},
+                {"Strobe", 23},
+                {"Strobe Rainbow", 24},
+                {"Strobe Mega", 25},
+                {"Blink Rainbow", 26},
+                {"Android", 27},
+                {"Chase", 28},
+                {"Chase Random", 29},
+                {"Chase Rainbow", 30},
+                {"Chase Flash", 31},
+                {"Chase Flash Rnd", 32},
+                {"Rainbow Runner", 33},
+                {"Colorful", 34},
+                {"Traffic Light", 35},
+                {"Sweep Random", 36},
+                {"Chase 2", 37},
+                {"Aurora", 38},
+                {"Stream", 39},
+                {"Scanner", 40},
+                {"Lighthouse", 41},
+                {"Fireworks", 42},
+                {"Rain", 43},
+                {"Tetrix", 44},
+                {"Fire Flicker", 45},
+                {"Gradient", 46},
+                {"Loading", 47},
+                {"Police", 48},
+                {"Fairy", 49},
+                {"Two Dots", 50},
+                {"Fairytwinkle", 51},
+                {"Running Dual", 52},
+                {"Halloween", 53},
+                {"Chase 3", 54},
+                {"Tri Wipe", 55},
+                {"Tri Fade", 56},
+                {"Lightning", 57},
+                {"ICU", 58},
+                {"Multi Comet", 59},
+                {"Scanner Dual", 60},
+                {"Stream 2", 61},
+                {"Oscillate", 62},
+                {"Pride 2015", 63},
+                {"Juggle", 64},
+                {"Palette", 65},
+                {"Fire 2012", 66},
+                {"Colorwaves", 67},
+                {"Bpm", 68},
+                {"Fill Noise", 69},
+                {"Noise 1", 70},
+                {"Noise 2", 71},
+                {"Noise 3", 72},
+                {"Noise 4", 73},
+                {"Colortwinkles", 74},
+                {"Lake", 75},
+                {"Meteor", 76},
+                {"Meteor Smooth", 77},
+                {"Railway", 78},
+                {"Ripple", 79},
+                {"Twinklefox", 80},
+                {"Twinklecat", 81},
+                {"Halloween Eyes", 82},
+                {"Solid Pattern", 83},
+                {"Solid Pattern Tri", 84},
+                {"Spots", 85},
+                {"Spots Fade", 86},
+                {"Glitter", 87},
+                {"Candle", 88},
+                {"Fireworks Starburst", 89},
+                {"Fireworks 1D", 90},
+                {"Bouncing Balls", 91},
+                {"Sinelon", 92},
+                {"Sinelon Dual", 93},
+                {"Sinelon Rainbow", 94},
+                {"Popcorn", 95},
+                {"Drip", 96},
+                {"Plasma", 97},
+                {"Percent", 98},
+                {"Ripple Rainbow", 99},
+                {"Heartbeat", 100},
+                {"Pacifica", 101},
+                {"Candle Multi", 102},
+                {"Solid Glitter", 103},
+                {"Sunrise", 104},
+                {"Phased", 105},
+                {"Twinkleup", 106},
+                {"Noise Pal", 107},
+                {"Sine", 108},
+                {"Phased Noise", 109},
+                {"Flow", 110},
+                {"Chunchun", 111},
+                {"Dancing Shadows", 112},
+                {"Washing Machine", 113},
+                {"Candy Cane", 114},
+                {"Blends", 115},
+                {"TV Simulator", 116},
+                {"Dynamic Smooth", 117}
+            };
+        }
+
+        public static int GetWLEDEffect(string effectName)
+        {
+            int returnVal;
+            if (effectLibrary.TryGetValue(effectName, out returnVal))
+                return returnVal;
+            else return 9999;
+        }
+    }
+}
