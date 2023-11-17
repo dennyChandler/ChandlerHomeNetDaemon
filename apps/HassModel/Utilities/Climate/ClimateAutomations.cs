@@ -16,7 +16,7 @@ namespace ChandlerHome.apps.HassModel.Utilities.Climate
                 .Subscribe(x =>
                 {
                     logger.LogInformation($"Starting open door check.");
-                    StartDoorOpenCheck(entities, new Services(ha));                    
+                    StartDoorOpenCheck(entities, new Services(ha));
                 });
         }
 
@@ -33,7 +33,7 @@ namespace ChandlerHome.apps.HassModel.Utilities.Climate
 
                 entities.Climate.LivingRoom.TurnOff();
                 var slogan = sloganizer.GetSlogan("Attic Fan");
-                
+
                 services.Notify.MobileAppDennysPhone(new NotifyMobileAppDennysPhoneParameters()
                 {
                     Title = "AC turned off!",
@@ -41,8 +41,8 @@ namespace ChandlerHome.apps.HassModel.Utilities.Climate
                 });
             }
             else if (entities.BinarySensor.BackDoorsOpen.IsOn()
-            && entities.Sensor.WeatherflowAirTemperature.State < 60
-            && entities.Sensor.WeatherflowAirTemperature.State > 90)
+            && (entities.Sensor.WeatherflowAirTemperature.State < 60
+            || entities.Sensor.WeatherflowAirTemperature.State > 90))
             {
                 services.Notify.MobileAppDennysPhone(new NotifyMobileAppDennysPhoneParameters()
                 {
@@ -50,7 +50,7 @@ namespace ChandlerHome.apps.HassModel.Utilities.Climate
                     Message = "It's either too hot or too cold and the back doors have been open over 5 minutes!"
                 });
                 logger.LogInformation($"not turning AC off: {entities.BinarySensor.BackDoorsOpen.IsOn()}, {entities.Sensor.WeatherflowAirTemperature.State}");
-            }            
+            }
         }
     }
 }

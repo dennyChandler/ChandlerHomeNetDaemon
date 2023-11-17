@@ -1,19 +1,11 @@
-﻿using ChandlerHome.apps.HassModel.Kitchen.Lighting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChandlerHome.apps.HassModel.BackOfHouse.Lighting
+﻿namespace ChandlerHome.apps.HassModel.BackOfHouse.Lighting
 {
     [NetDaemonApp(Id = "Back Of House Lights")]
     internal class BackOfHouseLights : BackOfHouse
     {
         DateTime? LightOnTime;
         TimeSpan lightTimeout = TimeSpan.FromMinutes(5);
-        public BackOfHouseLights(IHaContext ha, IScheduler scheduler) :base(ha)
+        public BackOfHouseLights(IHaContext ha, IScheduler scheduler) : base(ha)
         {
             _entities ??= new Entities(ha);
 
@@ -31,12 +23,12 @@ namespace ChandlerHome.apps.HassModel.BackOfHouse.Lighting
                 });
 
 
-            _entities.BinarySensor.BedroomGlassDoor.StateChanges().Where(e => e.New.IsOn() && _entities.Sensor.WeatherflowBrightness.State < 2000 && bedroomLight.IsOff()) //door opens
+            _entities.BinarySensor.BedroomGlassDoor.StateChanges().Where(e => e.New.IsOn() && (_entities.Sun.Sun.State.Equals("below_horizon", StringComparison.OrdinalIgnoreCase) || _entities.Sensor.WeatherflowBrightness.State < 2000) && bedroomLight.IsOff()) //door opens
                 .Subscribe(x =>
                 {
                     bedroomLight.TurnOn(colorName: "white", brightnessPct: 100);
                 });
-            _entities.BinarySensor.KitchenGlassDoor.StateChanges().Where(e => e.New.IsOn() && _entities.Sensor.WeatherflowBrightness.State < 2000 && kitchenLight.IsOff()) //door opens
+            _entities.BinarySensor.KitchenGlassDoor.StateChanges().Where(e => e.New.IsOn() && (_entities.Sun.Sun.State.Equals("below_horizon", StringComparison.OrdinalIgnoreCase) || _entities.Sensor.WeatherflowBrightness.State < 2000) && kitchenLight.IsOff()) //door opens
                 .Subscribe(x =>
                 {
                     kitchenLight.TurnOn(colorName: "white", brightnessPct: 100);
@@ -51,27 +43,35 @@ namespace ChandlerHome.apps.HassModel.BackOfHouse.Lighting
             Observable.Interval(TimeSpan.FromMinutes(1))
             .Subscribe(_ =>
             {
-                    if (LightOnTime != null && kitchenLight.IsOn())
-                    {
+                if (LightOnTime != null && kitchenLight.IsOn())
+                {
                     // Check if it's time to turn off the lights
-                        if (backOfHouseLights.IsOn()
-                        && DateTime.Now - LightOnTime >= lightTimeout)
+                    if (backOfHouseLights.IsOn()
+                    && DateTime.Now - LightOnTime >= lightTimeout)
                     {
+                        if (DateTime.Now.Hour < 17)
+                        {
                             TurnOff(backOfHouseLights, transition: 60);
-                        LightOnTime = null;
+                            LightOnTime = null;
+                        }
+                        else if (_entities.Sensor.WeatherflowBrightness.State > 2000)
+                        {
+                            TurnOff(backOfHouseLights, transition: 60);
+                            LightOnTime = null;
+                        }
                     }
                 }
-                    else if (LightOnTime == null && backOfHouseLights.IsOn()
-                        && DateTime.Now.Hour < 20)
-                    {
-                        LightOnTime = DateTime.Now;
-                    }
-                });
+                else if (LightOnTime == null && backOfHouseLights.IsOn()
+                    && DateTime.Now.Hour < 20)
+                {
+                    LightOnTime = DateTime.Now;
+                }
+            });
         }
 
         private void TurnOnBackDeckLights(LightEntity bedroomLight, LightEntity kitchenLight)
         {
-            switch(DateTime.Now.Month)
+            switch (DateTime.Now.Month)
             {
                 case 10:
                     bedroomLight.TurnOn(colorName: "purple", brightnessPct: 100);

@@ -1,14 +1,7 @@
-﻿using ChandlerHome.apps.HassModel.Office;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ChandlerHome.apps.HassModel.Bedroom.Lighting
+﻿namespace ChandlerHome.apps.HassModel.Bedroom.Lighting
 {
     [NetDaemonApp(Id = "Bedroom Closet Light")]
-    internal class ClosetLight:Bedroom
+    internal class ClosetLight : Bedroom
     {
         private TimeSpan motionTimeout = TimeSpan.FromMinutes(5);
         DateTime? offTime;
@@ -36,7 +29,7 @@ namespace ChandlerHome.apps.HassModel.Bedroom.Lighting
                    // Check if it's time to turn off the lights
                    if (_entities.Light.BedroomClosetLight.IsOn()
                     && DateTime.Now - offTime >= motionTimeout
-                    && _entities.BinarySensor.ClosetMotionMotionDetection.IsOff())
+                    && (_entities.BinarySensor.ClosetMotionMotionDetection.IsOff() || _entities.BinarySensor.ClosetMotionMotionDetection.State.Equals("unknown", StringComparison.OrdinalIgnoreCase)))
                    {
                        if (DateTime.Now.Hour < 23 && DateTime.Now.Hour > 20)
                            return;

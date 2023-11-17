@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace ChandlerHome.apps.HassModel.FrontOfHouse.Lighting.LightRoutines
 {
@@ -41,7 +36,7 @@ namespace ChandlerHome.apps.HassModel.FrontOfHouse.Lighting.LightRoutines
 
             frontLightsOn = true;
             while (frontLightsOn)
-            {                
+            {
                 TurnOn(northLight, 100, 5, "red", false);
                 TurnOn(southLight, 100, 5, "green", false);
                 await Task.Delay(TimeSpan.FromSeconds(10));
@@ -64,8 +59,8 @@ namespace ChandlerHome.apps.HassModel.FrontOfHouse.Lighting.LightRoutines
                 TurnOn(southLight, 100, 5, "purple", false);
                 await Task.Delay(TimeSpan.FromSeconds(10));
 
-                TurnOn(northLight, 100, 5, "pink", false);
-                TurnOn(southLight, 100, 5, "pink", false);
+                TurnOn(northLight, 100, 5, "blue", false);
+                TurnOn(southLight, 100, 5, "blue", false);
                 await Task.Delay(TimeSpan.FromSeconds(10));
 
                 TurnOn(northLight, 100, 5, "orange", false);

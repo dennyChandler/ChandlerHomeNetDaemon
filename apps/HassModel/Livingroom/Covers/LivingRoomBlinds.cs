@@ -7,13 +7,14 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
     {
         private DateTime sunset;
         private DateTime sunsetUtc;
+        private bool sunsetShut;
         public LivingRoomBlinds(IHaContext ha, IScheduler scheduler, ILogger<LivingRoomBlinds> logger) : base(ha)
-        {            
+        {
             _entities ??= new Entities(ha);
             scheduler.ScheduleCron("0 4 * * *", () => GetSunsetTime(logger));
 
             var services = new Services(ha);
-
+            //Services.OpenCover/CloseCover reversed because this zigbee wand flipped directions at some point.
 
             _entities.InputBoolean.ItsTooDamnHot.StateChanges().Where(e => e.New.IsOn())
                 .Subscribe(x =>
@@ -23,7 +24,7 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                         if (_entities.InputBoolean.LivingRoomOverride.IsOff())
                         {
                             logger.LogInformation("Too Damn Hot! Close Blinds");
-                            services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                            services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                             if (_entities.Cover.BlindTilt8ce2.State.Equals("opening", StringComparison.OrdinalIgnoreCase))
                                 _entities.Cover.BlindTilt8ce2.CloseCover();
                         }
@@ -38,12 +39,13 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                         var timeDifference = sunset - DateTime.Now;
                         if (timeDifference <= TimeSpan.FromHours(2) && timeDifference > TimeSpan.Zero)
                         {
-                            if (_entities.Cover.LivingRoomBlindsCover.State.Equals("closing", StringComparison.OrdinalIgnoreCase) || _entities.Cover.BlindTilt8ce2.State.Equals("closed",StringComparison.OrdinalIgnoreCase))
+                            if (_entities.Cover.LivingRoomBlindsCover.State.Equals("closing", StringComparison.OrdinalIgnoreCase) || _entities.Cover.BlindTilt8ce2.State.Equals("closed", StringComparison.OrdinalIgnoreCase) && sunsetShut)
                             {
                                 if (_entities.InputBoolean.LivingRoomOverride.IsOff())
                                 {
+                                    sunsetShut = false;
                                     logger.LogInformation($"Not 2 Hours Before Sunrise, Open Blinds. Sunset: {sunset}, Now: {DateTime.Now}");
-                                    services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                                    services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                                     if (_entities.Cover.BlindTilt8ce2.State.Equals("closing", StringComparison.OrdinalIgnoreCase))
                                         _entities.Cover.BlindTilt8ce2.OpenCover();
                                 }
@@ -52,10 +54,11 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                         else if (timeDifference < TimeSpan.Zero)
                         {
                             if (_entities.InputBoolean.LivingRoomOverride.IsOff())
-                                if (_entities.Cover.LivingRoomBlindsCover.State.Equals("opening", StringComparison.OrdinalIgnoreCase) || _entities.Cover.BlindTilt8ce2.State.Equals("open", StringComparison.OrdinalIgnoreCase))
+                                if (_entities.Cover.LivingRoomBlindsCover.State.Equals("opening", StringComparison.OrdinalIgnoreCase) || _entities.Cover.BlindTilt8ce2.State.Equals("open", StringComparison.OrdinalIgnoreCase) && !sunsetShut)
                                 {
+                                    sunsetShut = true;
                                     logger.LogInformation($"2 hours before sunset, close blinds.  Sunset: {sunset}, Now: {DateTime.Now}");
-                                    services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                                    services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                                     if (_entities.Cover.BlindTilt8ce2.State.Equals("opening", StringComparison.OrdinalIgnoreCase))
                                         _entities.Cover.BlindTilt8ce2.CloseCover();
                                 }
@@ -69,7 +72,7 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                     if (_entities.InputBoolean.LivingRoomOverride.IsOff())
                     {
                         logger.LogInformation($"Light Level is above 2.  Light Level: {_entities.Sensor.BlindTilt8ce2LightLevel.State}");
-                        services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                        services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                         if (_entities.Cover.BlindTilt8ce2.State.Equals("opening", StringComparison.OrdinalIgnoreCase))
                             _entities.Cover.BlindTilt8ce2.CloseCover();
                     }
@@ -80,7 +83,7 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                     if (_entities.InputBoolean.LivingRoomOverride.IsOff())
                     {
                         logger.LogInformation($"Light Level is 2 or less.  Light Level: {_entities.Sensor.BlindTilt8ce2LightLevel.State}");
-                        services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                        services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                         if (_entities.Cover.BlindTilt8ce2.State.Equals("closing", StringComparison.OrdinalIgnoreCase))
                             _entities.Cover.BlindTilt8ce2.OpenCover();
                     }
@@ -99,14 +102,14 @@ namespace ChandlerHome.apps.HassModel.Livingroom.Covers
                     if (_entities.Sensor.BlindTilt8ce2LightLevel.State.Value > 2)
                     {
                         logger.LogInformation($"INIT: Light Level is above 2.  Light Level: {_entities.Sensor.BlindTilt8ce2LightLevel.State}");
-                        services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                        services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                         if (_entities.Cover.BlindTilt8ce2.State.Equals("opening", StringComparison.OrdinalIgnoreCase))
                             _entities.Cover.BlindTilt8ce2.CloseCover();
                     }
                     else
                     {
                         logger.LogInformation($"INIT: Light Level is 2 or less.  Light Level: {_entities.Sensor.BlindTilt8ce2LightLevel.State}");
-                        services.Cover.OpenCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
+                        services.Cover.CloseCover(ServiceTarget.FromEntities(_entities.Cover.LivingRoomBlindsCover.EntityId));
                         if (_entities.Cover.BlindTilt8ce2.State.Equals("closing", StringComparison.OrdinalIgnoreCase))
                             _entities.Cover.BlindTilt8ce2.OpenCover();
                     }
